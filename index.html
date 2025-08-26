@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Night Manager - Prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f7fafc;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none; /* Firefox */
+        }
+        .screen::-webkit-scrollbar {
+            display: none; /* Safari and Chrome */
+        }
+        .screen.hidden {
+            transform: translateX(100%);
+        }
+        .screen.slide-out {
+            transform: translateX(-100%);
+        }
+        .splash-fade-out {
+            animation: fadeOut 1s forwards;
+            animation-delay: 2s;
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; visibility: hidden; }
+        }
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+        }
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        .coin-animation {
+            animation: coin-fall 0.8s ease-out forwards;
+        }
+        @keyframes coin-fall {
+            0% { transform: translateY(-100px) rotate(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(0) rotate(360deg); opacity: 1; }
+        }
+        .progress-bar-fill {
+            transition: width 1s ease-in-out;
+        }
+        .bottom-nav-item.active i, .bottom-nav-item.active span {
+            color: #facc15; /* yellow-400 */
+        }
+        .modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-container.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+        .modal-container.show .modal-content {
+            transform: scale(1);
+        }
+        .custom-alert {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2d3748;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 200;
+            transition: top 0.5s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .custom-alert.show {
+            top: 20px;
+        }
+        .tab-button.active {
+            border-bottom-color: #facc15;
+            color: #1a202c;
+        }
+    </style>
+</head>
+<body class="bg-gray-800 flex justify-center items-center h-screen">
+
+    <div class="relative w-full max-w-sm h-full max-h-[800px] bg-white shadow-2xl rounded-3xl overflow-hidden">
+
+        <!-- Splash Screen -->
+        <div id="splash-screen" class="screen flex flex-col justify-center items-center bg-gradient-to-br from-gray-900 to-blue-900 splash-fade-out">
+            <div class="flex items-center text-white text-4xl font-bold">
+                <i class="fas fa-moon mr-3 text-yellow-300"></i>
+                <i class="fas fa-utensils mr-3 text-yellow-300"></i>
+                <span>Night Manager</span>
+            </div>
+        </div>
+
+        <!-- Onboarding Screen -->
+        <div id="onboarding-screen" class="screen hidden">
+             <div class="h-full flex flex-col">
+                <div class="flex-grow h-3/5 relative">
+                    <div id="onboarding-slides" class="w-full h-full flex transition-transform duration-300">
+                        <!-- Slide 1 -->
+                        <div class="w-full flex-shrink-0 flex flex-col items-center justify-center p-8 text-center">
+                            <img src="https://img.freepik.com/free-vector/students-using-e-learning-platform-video-laptop-screen-online-education-website_335657-3004.jpg?w=996&t=st=1724700201~exp=1724700801~hmac=b31d454687d605655a6d3663b652614b9c5132228f413d31481b2390a1876878" onerror="this.onerror=null;this.src='https://placehold.co/300x200/e2e8f0/4a5568?text=Illustration';" alt="Students ordering food" class="w-full max-w-xs h-auto rounded-lg mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800">Order from anywhere on campus.</h2>
+                        </div>
+                        <!-- Slide 2 -->
+                        <div class="w-full flex-shrink-0 flex flex-col items-center justify-center p-8 text-center">
+                            <img src="https://img.freepik.com/free-vector/delivery-service-with-masks-concept_23-2148505187.jpg?w=740&t=st=1724700234~exp=1724700834~hmac=553554471018335b24479901596707328ff963e635d8d8f0744e830e71360010" onerror="this.onerror=null;this.src='https://placehold.co/300x200/e2e8f0/4a5568?text=Illustration';" alt="Delivery to dorm" class="w-full max-w-xs h-auto rounded-lg mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800">Get meals delivered fast.</h2>
+                        </div>
+                        <!-- Slide 3 -->
+                        <div class="w-full flex-shrink-0 flex flex-col items-center justify-center p-8 text-center">
+                            <img src="https://img.freepik.com/free-vector/digital-wallet-concept-illustration_114360-7569.jpg?w=740&t=st=1724700262~exp=1724700862~hmac=19438289a81e355745196417537b98935c13880486c9d09c38733368b6b21695" onerror="this.onerror=null;this.src='https://placehold.co/300x200/e2e8f0/4a5568?text=Illustration';" alt="Reward coins" class="w-full max-w-xs h-auto rounded-lg mb-8">
+                            <h2 class="text-2xl font-bold text-gray-800">Earn NightCoins with every order.</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-8 flex flex-col items-center">
+                    <div id="progress-dots" class="flex space-x-2 mb-6">
+                        <div class="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                        <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                        <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                    </div>
+                    <button id="onboarding-next" class="w-full bg-yellow-400 text-gray-900 font-bold py-3 px-4 rounded-lg shadow-md ripple">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login/Sign-Up Screen -->
+        <div id="login-screen" class="screen hidden bg-gray-50 flex flex-col justify-center p-8">
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-bold text-gray-800">Welcome!</h1>
+                <p class="text-gray-500 mt-2">Login to continue.</p>
+            </div>
+            <div class="space-y-4">
+                <input type="text" placeholder="Email / ID" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                <input type="password" placeholder="Password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400">
+            </div>
+            <div class="text-right mt-2">
+                <a href="#" class="text-sm text-gray-500 hover:text-gray-800">Forgot Password?</a>
+            </div>
+            <div class="mt-8 space-y-3">
+                <button class="w-full bg-yellow-400 text-gray-900 font-bold py-3 px-4 rounded-lg shadow-md ripple" onclick="navigateTo('home-screen')">Login as Student</button>
+                <button class="w-full bg-gray-800 text-white font-bold py-3 px-4 rounded-lg shadow-md ripple" onclick="navigateTo('owner-dashboard-screen')">Login as Restaurant Owner</button>
+                <button class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg shadow-md ripple" onclick="navigateTo('agent-kyc-screen')">Login as Agent</button>
+            </div>
+        </div>
+        
+        <!-- Main App Screens Container (Student Flow) -->
+        <div id="main-app" class="hidden h-full">
+            <!-- Home Screen -->
+            <div id="home-screen" class="screen !relative !transform-none pb-20">
+                <div class="p-4">
+                    <h1 class="text-2xl font-bold text-gray-800">Hi, Raghav Gupta!</h1>
+                    <p class="text-gray-500">What are you craving tonight?</p>
+                    <div class="mt-4 relative">
+                        <input type="text" placeholder="Search restaurants or dishes..." class="w-full pl-10 pr-4 py-3 bg-gray-100 border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                <div class="px-4 space-y-4">
+                    <!-- Restaurant Cards -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden ripple" onclick="navigateTo('menu-screen')">
+                        <img src="https://img.freepik.com/free-photo/indian-dhal-spicy-curry-bowl-spices-herbs-rustic-black-wooden-table_2829-18716.jpg?w=996&t=st=1724701258~exp=1724701858~hmac=50e90c679234b6791e3e7826359e9a41926c48325605d392095f7c320d3644f1" class="w-full h-32 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/384x128/e2e8f0/4a5568?text=Moms+Cube';">
+                        <div class="p-3"><h3 class="font-bold text-lg">Moms Cube</h3><p class="text-sm text-gray-500">Home-style, North Indian</p></div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden ripple" onclick="navigateTo('menu-screen')">
+                        <img src="https://img.freepik.com/free-photo/samosas-with-spicy-sauce_140725-5703.jpg?w=996&t=st=1724701311~exp=1724701911~hmac=7f113e316d860d8157e8411b43851571d471550993952a6575971434313f8955" class="w-full h-32 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/384x128/e2e8f0/4a5568?text=Sharma+Canteen';">
+                        <div class="p-3"><h3 class="font-bold text-lg">Sharma's Canteen</h3><p class="text-sm text-gray-500">Snacks, Canteen Classics</p></div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden ripple" onclick="navigateTo('menu-screen')">
+                        <img src="https://img.freepik.com/free-photo/aloo-paratha-gobi-paratha-also-known-as-potato-cauliflower-stuffed-flatbread-dish-originating-from-indian-subcontinent_466689-76609.jpg?w=996&t=st=1724701344~exp=1724701944~hmac=c68705f1f94578b8a07c95e1e55024505f01344490f209587353b3476d059080" class="w-full h-32 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/384x128/e2e8f0/4a5568?text=JhaJi+Parathe';">
+                        <div class="p-3"><h3 class="font-bold text-lg">JhaJi ke Parathe</h3><p class="text-sm text-gray-500">Parathas, Indian Breads</p></div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden ripple" onclick="navigateTo('menu-screen')">
+                         <img src="https://img.freepik.com/free-photo/cup-coffee-with-heart-drawn-foam_1286-260.jpg?w=740&t=st=1724701375~exp=1724701975~hmac=940422c54f590484501a3000570a243d687b3226a042a9b3a58d839611f721c5" class="w-full h-32 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/384x128/e2e8f0/4a5568?text=Nescafe';">
+                        <div class="p-3"><h3 class="font-bold text-lg">Nescafe</h3><p class="text-sm text-gray-500">Coffee, Beverages</p></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="menu-screen" class="screen hidden pb-20">
+                <div class="p-4 flex items-center border-b">
+                    <button class="text-gray-700 mr-4" onclick="navigateBack()"><i class="fas fa-arrow-left text-xl"></i></button>
+                    <h2 class="text-xl font-bold text-gray-800">Sharma's Canteen</h2>
+                </div>
+                <div class="p-4 space-y-4">
+                    <div class="flex items-center">
+                        <img src="https://img.freepik.com/free-photo/aloo-paratha-gobi-paratha-also-known-as-potato-cauliflower-stuffed-flatbread-dish-originating-from-indian-subcontinent_466689-76609.jpg?w=996&t=st=1724701344~exp=1724701944~hmac=c68705f1f94578b8a07c95e1e55024505f01344490f209587353b3476d059080" onerror="this.onerror=null;this.src='https://placehold.co/80x80/e2e8f0/4a5568?text=Item';" alt="Food item" class="w-20 h-20 rounded-lg object-cover">
+                        <div class="ml-4 flex-grow" onclick="openModal('customization-modal')">
+                            <h4 class="font-bold">Aloo Paratha</h4>
+                            <p class="text-sm text-gray-500">Stuffed Indian bread with spiced potatoes.</p>
+                            <p class="font-semibold mt-1">₹80</p>
+                        </div>
+                        <button class="bg-yellow-100 text-yellow-600 font-bold px-4 py-2 rounded-lg ripple" onclick="addToCart(event)">+ Add</button>
+                    </div>
+                    <div class="flex items-center">
+                        <img src="https://img.freepik.com/free-photo/top-view-cup-coffee-with-cinnamon-sticks-book-table_176474-543.jpg?w=996&t=st=1724702582~exp=1724703182~hmac=a4505494d4d2938c117361a684b3917a224976766467026786a3b2f5b597148b" onerror="this.onerror=null;this.src='https://placehold.co/80x80/e2e8f0/4a5568?text=Item';" alt="Food item" class="w-20 h-20 rounded-lg object-cover">
+                        <div class="ml-4 flex-grow" onclick="openModal('customization-modal')">
+                            <h4 class="font-bold">Cold Coffee</h4>
+                            <p class="text-sm text-gray-500">Refreshing cold coffee with ice cream.</p>
+                            <p class="font-semibold mt-1">₹100</p>
+                        </div>
+                        <button class="bg-yellow-100 text-yellow-600 font-bold px-4 py-2 rounded-lg ripple" onclick="addToCart(event)">+ Add</button>
+                    </div>
+                </div>
+                <div id="cart-preview" class="fixed bottom-16 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[calc(384px-2rem)] bg-yellow-400 text-gray-900 p-3 rounded-lg shadow-lg flex justify-between items-center hidden ripple" onclick="navigateTo('cart-screen')">
+                    <span id="cart-info" class="font-bold"></span>
+                    <span class="font-bold">View Cart <i class="fas fa-arrow-right ml-2"></i></span>
+                </div>
+            </div>
+
+            <div id="cart-screen" class="screen hidden bg-gray-50">
+                <div class="p-4 flex items-center border-b">
+                    <button class="text-gray-700 mr-4" onclick="navigateBack()"><i class="fas fa-arrow-left text-xl"></i></button>
+                    <h2 class="text-xl font-bold text-gray-800">Your Cart</h2>
+                </div>
+                <div class="p-4 space-y-3">
+                    <div class="flex items-center bg-white p-3 rounded-lg"><div class="flex-grow"><h4 class="font-semibold">Aloo Paratha</h4><p class="font-bold text-gray-800">₹80</p></div><div class="flex items-center space-x-3 bg-gray-100 rounded-lg px-2 py-1"><button class="font-bold text-lg">-</button><span>1</span><button class="font-bold text-lg">+</button></div></div>
+                    <div class="flex items-center bg-white p-3 rounded-lg"><div class="flex-grow"><h4 class="font-semibold">Cold Coffee</h4><p class="font-bold text-gray-800">₹100</p></div><div class="flex items-center space-x-3 bg-gray-100 rounded-lg px-2 py-1"><button class="font-bold text-lg">-</button><span>1</span><button class="font-bold text-lg">+</button></div></div>
+                </div>
+                <div class="p-4">
+                    <div class="flex justify-center bg-gray-200 p-1 rounded-full" id="delivery-toggle">
+                        <button class="w-1/2 bg-white text-gray-800 py-2 rounded-full shadow font-semibold" data-type="delivery">Delivery</button>
+                        <button class="w-1/2 text-gray-500 py-2 rounded-full font-semibold" data-type="pickup">Pickup</button>
+                    </div>
+                </div>
+                <div id="pickup-options" class="hidden p-4 space-y-3">
+                    <div>
+                        <label class="font-bold text-sm">Pickup Time</label>
+                        <input type="time" value="23:30" class="w-full mt-1 p-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="font-bold text-sm">Broadcast On</label>
+                        <div class="flex space-x-4 text-3xl mt-2">
+                            <i class="fab fa-whatsapp-square text-green-500 cursor-pointer"></i>
+                            <i class="fab fa-instagram-square text-pink-500 cursor-pointer"></i>
+                            <i class="fab fa-facebook-square text-blue-600 cursor-pointer"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-b bg-white">
+                    <div class="flex justify-between items-center"><p class="text-gray-500">Subtotal</p><p class="font-semibold">₹180</p></div>
+                    <div class="flex justify-between items-center mt-1"><p class="text-gray-500">Taxes & Charges</p><p class="font-semibold">₹32</p></div>
+                    <div class="flex justify-between items-center mt-3 pt-3 border-t font-bold text-lg"><p>To Pay</p><p>₹212</p></div>
+                </div>
+                <div class="p-4 mt-auto">
+                     <button class="w-full bg-yellow-400 text-gray-900 font-bold py-3 px-4 rounded-lg shadow-md ripple" onclick="navigateTo('payment-screen')">Proceed to Payment</button>
+                </div>
+            </div>
+            
+            <div id="tracking-screen" class="screen hidden">
+                <div class="p-4 text-center">
+                    <h2 class="text-lg font-bold">Order #NM12345</h2>
+                    <p class="text-2xl font-bold text-green-600">Arriving in 18 mins</p>
+                </div>
+                <div class="p-4">
+                    <div class="relative pt-1">
+                        <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-yellow-200">
+                            <div id="progress-bar" style="width:25%" class="progress-bar-fill shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500">
+                        <span id="status-confirmed" class="font-bold text-yellow-600">Confirmed</span>
+                        <span id="status-preparing">Preparing</span>
+                        <span id="status-ready">Ready</span>
+                        <span id="status-delivered">Delivered</span>
+                    </div>
+                </div>
+                <div class="h-64 bg-gray-200 m-4 rounded-lg flex items-center justify-center relative overflow-hidden">
+                    <img src="https://media.wired.com/photos/59269cd37034dc5f91bec0f1/master/w_2560%2Cc_limit/GoogleMapTA.jpg" class="w-full h-full object-cover" alt="Campus Map" onerror="this.onerror=null;this.src='https://placehold.co/384x256/e2e8f0/4a5568?text=Campus+Map';">
+                    <i id="rider-icon" class="fas fa-motorcycle text-4xl text-gray-900 bg-white p-2 rounded-full shadow-lg absolute transition-all duration-1000" style="left: 20%; bottom: 40%;"></i>
+                </div>
+                 <div class="p-4 text-center">
+                    <button class="bg-red-100 text-red-600 px-6 py-2 rounded-lg font-semibold">Cancel Order</button>
+                </div>
+            </div>
+
+            <div id="orders-screen" class="screen !relative !transform-none hidden pb-20">
+                <div class="p-4 border-b"><h2 class="text-xl font-bold text-gray-800">My Orders</h2></div>
+                <div class="p-4 space-y-3">
+                    <div class="bg-white p-3 rounded-lg shadow">
+                        <div class="flex justify-between items-start">
+                            <div><h4 class="font-bold">Sharma's Canteen</h4><p class="text-sm text-gray-500">Aloo Paratha, Cold Coffee • Aug 27, 2025</p></div>
+                            <span class="text-sm font-semibold bg-green-100 text-green-700 px-2 py-1 rounded-full">Delivered</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-3"><p class="font-bold">₹212</p><button class="bg-yellow-100 text-yellow-600 font-bold px-4 py-1 rounded-lg text-sm ripple">Reorder</button></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="rewards-screen" class="screen !relative !transform-none hidden pb-20">
+                 <div class="p-4 border-b"><h2 class="text-xl font-bold text-gray-800">Rewards & Deals</h2></div>
+                <div class="p-4 bg-gradient-to-r from-yellow-400 to-orange-400 m-4 rounded-lg text-white shadow-lg">
+                    <p class="text-sm opacity-80">Your Balance</p>
+                    <div class="flex items-center"><p class="text-4xl font-bold">150</p><span class="ml-2 font-semibold">NightCoins</span><i class="fas fa-coins ml-1 text-2xl"></i></div>
+                    <button class="mt-3 bg-white text-yellow-500 font-bold px-4 py-2 rounded-full text-sm">Redeem Now</button>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-bold text-lg mb-2">Active Deals</h3>
+                    <div class="flex overflow-x-auto space-x-4 pb-2">
+                        <div class="flex-shrink-0 w-64 bg-blue-500 text-white p-4 rounded-lg"><h4 class="font-bold">Midnight Combo</h4><p class="text-2xl font-bold">20% OFF</p><p class="text-xs mt-1">on orders above ₹200</p></div>
+                         <div class="flex-shrink-0 w-64 bg-purple-500 text-white p-4 rounded-lg"><h4 class="font-bold">Shake Special</h4><p class="text-2xl font-bold">Free Shake</p><p class="text-xs mt-1">with any Pizza</p></div>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-bold text-lg mb-2">Challenges</h3>
+                    <div class="bg-white p-4 rounded-lg shadow"><h4 class="font-semibold">Order 3 times this week</h4><p class="text-sm text-gray-500">Win 50 bonus NightCoins!</p><div class="w-full bg-gray-200 rounded-full h-2.5 mt-2"><div class="bg-yellow-400 h-2.5 rounded-full" style="width: 33%"></div></div></div>
+                </div>
+            </div>
+
+            <div id="profile-screen" class="screen !relative !transform-none hidden pb-20 bg-gray-50">
+                <div class="p-4 flex items-center space-x-4">
+                    <img src="https://img.freepik.com/free-photo/portrait-young-male-student-with-blurry-background_23-2148204902.jpg?w=996&t=st=1724700511~exp=1724701111~hmac=62d989f660f60f6993a4087e5052994444983a54d380f68d601b0728c68b75f0" onerror="this.onerror=null;this.src='https://placehold.co/80x80/e2e8f0/4a5568?text=Profile';" alt="Profile Picture" class="w-20 h-20 rounded-full object-cover">
+                    <div><h2 class="text-xl font-bold">Raghav Gupta</h2><p class="text-gray-500">ID: 12345678</p></div>
+                </div>
+                 <div class="p-4 space-y-2">
+                    <a href="#" class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm"><span><i class="fas fa-wallet mr-3 text-gray-500"></i>Payment Methods</span><i class="fas fa-chevron-right text-gray-400"></i></a>
+                    <a href="#" class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm"><span><i class="fas fa-map-marker-alt mr-3 text-gray-500"></i>Saved Addresses</span><i class="fas fa-chevron-right text-gray-400"></i></a>
+                    <a href="#" class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm"><span><i class="fas fa-cog mr-3 text-gray-500"></i>Settings</span><i class="fas fa-chevron-right text-gray-400"></i></a>
+                </div>
+                 <div class="p-4 mt-8"><button class="w-full bg-red-100 text-red-600 font-bold py-3 px-4 rounded-lg ripple" onclick="logout()">Logout</button></div>
+            </div>
+            
+            <div class="absolute bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around">
+                <button class="bottom-nav-item flex-1 text-center py-3 text-gray-500 active" data-target="home-screen"><i class="fas fa-home text-xl"></i><span class="block text-xs">Home</span></button>
+                <button class="bottom-nav-item flex-1 text-center py-3 text-gray-500" data-target="orders-screen"><i class="fas fa-box text-xl"></i><span class="block text-xs">Orders</span></button>
+                <button class="bottom-nav-item flex-1 text-center py-3 text-gray-500" data-target="rewards-screen"><i class="fas fa-gift text-xl"></i><span class="block text-xs">Rewards</span></button>
+                <button class="bottom-nav-item flex-1 text-center py-3 text-gray-500" data-target="profile-screen"><i class="fas fa-user text-xl"></i><span class="block text-xs">Profile</span></button>
+            </div>
+        </div>
+
+        <!-- Payment Screen -->
+        <div id="payment-screen" class="screen hidden flex flex-col items-center justify-center bg-gray-900 text-white">
+            <i class="fas fa-shield-alt text-6xl text-yellow-400"></i>
+            <h2 class="text-2xl font-bold mt-4">Processing Payment...</h2>
+            <p class="text-gray-400">Please wait, do not close the app.</p>
+            <div class="w-24 h-24 border-4 border-dashed border-gray-600 rounded-full animate-spin mt-8"></div>
+        </div>
+
+        <!-- Agent KYC Screen -->
+        <div id="agent-kyc-screen" class="screen hidden">
+            <div class="p-4 flex items-center border-b">
+                <button class="text-gray-700 mr-4" onclick="logout()"><i class="fas fa-arrow-left text-xl"></i></button>
+                <h2 class="text-xl font-bold text-gray-800">Agent Verification (KYC)</h2>
+            </div>
+            <div class="p-4 space-y-4">
+                <div><label class="font-semibold text-sm">Full Name</label><input type="text" class="w-full p-2 border rounded-lg mt-1"></div>
+                <div><label class="font-semibold text-sm">Aadhar Card Number</label><input type="text" class="w-full p-2 border rounded-lg mt-1"></div>
+                <div><label class="font-semibold text-sm">PAN Card Number</label><input type="text" class="w-full p-2 border rounded-lg mt-1"></div>
+                <div class="text-center p-6 border-2 border-dashed rounded-lg">
+                    <i class="fas fa-camera text-3xl text-gray-400"></i>
+                    <p class="mt-2 text-sm text-gray-500">Upload Your Selfie</p>
+                </div>
+                <button class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg ripple" onclick="navigateTo('agent-dashboard-screen')">Submit for Verification</button>
+            </div>
+        </div>
+        
+        <!-- Agent Dashboard Screen -->
+        <div id="agent-dashboard-screen" class="screen hidden">
+            <div class="p-4 flex justify-between items-center border-b">
+                <div><h2 class="text-xl font-bold text-gray-800">Available Pickups</h2><p class="text-sm text-gray-500">Near You</p></div>
+                <button class="text-gray-700" onclick="logout()"><i class="fas fa-sign-out-alt text-xl"></i></button>
+            </div>
+            <div class="p-4 space-y-3">
+                <div class="bg-white p-3 rounded-lg shadow">
+                    <div class="flex justify-between items-start">
+                        <div><h4 class="font-bold">Order #NM54321</h4><p class="text-sm text-gray-500"><span class="font-semibold">From:</span> Sharma's Canteen</p></div>
+                        <span class="font-bold text-lg">₹50</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1"><span class="font-semibold">To:</span> Student Dorm Block-A</p>
+                    <button class="w-full mt-3 bg-green-500 text-white font-bold py-2 rounded-lg ripple" onclick="showCustomAlert('Order Accepted! Please proceed to pickup.')">Accept Job</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Restaurant Owner Dashboard Screen -->
+        <div id="owner-dashboard-screen" class="screen hidden">
+            <div class="p-4 flex justify-between items-center border-b">
+                <div><h2 class="text-xl font-bold text-gray-800">Welcome, Sharma!</h2><p class="text-sm text-gray-500">Sharma's Canteen Dashboard</p></div>
+                <button class="text-gray-700" onclick="logout()"><i class="fas fa-sign-out-alt text-xl"></i></button>
+            </div>
+            <div class="flex border-b">
+                <button class="tab-button flex-1 text-center py-3 font-semibold border-b-2 border-transparent text-gray-500 active" data-tab="new-orders">New (2)</button>
+                <button class="tab-button flex-1 text-center py-3 font-semibold border-b-2 border-transparent text-gray-500" data-tab="preparing-orders">Preparing (1)</button>
+                <button class="tab-button flex-1 text-center py-3 font-semibold border-b-2 border-transparent text-gray-500" data-tab="ready-orders">Ready (0)</button>
+            </div>
+            <div id="new-orders" class="p-4 space-y-3">
+                <div class="bg-white p-3 rounded-lg shadow order-card">
+                    <div class="flex justify-between"><h4 class="font-bold">Order #NM12345</h4><span class="text-sm text-gray-500">2 mins ago</span></div>
+                    <p class="font-semibold my-1">1x Aloo Paratha, 1x Cold Coffee</p>
+                    <div class="flex space-x-2 mt-2">
+                        <button class="flex-1 bg-red-500 text-white font-bold py-2 rounded-lg ripple">Reject</button>
+                        <button class="flex-1 bg-green-500 text-white font-bold py-2 rounded-lg ripple" onclick="updateOrderStatus(this, 'preparing')">Accept & Prepare</button>
+                    </div>
+                </div>
+            </div>
+            <div id="preparing-orders" class="p-4 space-y-3 hidden">
+                 <div class="bg-white p-3 rounded-lg shadow order-card">
+                    <div class="flex justify-between"><h4 class="font-bold">Order #NM12344</h4><span class="text-sm text-gray-500">5 mins ago</span></div>
+                    <p class="font-semibold my-1">2x Samosa</p>
+                    <button class="w-full mt-2 bg-yellow-500 text-white font-bold py-2 rounded-lg ripple" onclick="updateOrderStatus(this, 'ready')">Mark as Ready for Pickup</button>
+                </div>
+            </div>
+            <div id="ready-orders" class="p-4 space-y-3 hidden">
+                <p class="text-center text-gray-500 mt-8">No orders are ready for pickup.</p>
+            </div>
+        </div>
+
+        <!-- Modals and Alerts -->
+        <div id="customization-modal" class="modal-container">
+            <div class="modal-content"><h3 class="font-bold text-lg mb-4">Customize Item</h3><p class="font-semibold">Spice Level</p><div class="flex space-x-2 mt-1 mb-4"><button class="flex-1 border py-2 rounded-lg">Mild</button><button class="flex-1 border border-yellow-400 bg-yellow-100 py-2 rounded-lg">Medium</button><button class="flex-1 border py-2 rounded-lg">Spicy</button></div><p class="font-semibold">Add-ons</p><div class="space-y-2 mt-1"><label class="flex items-center"><input type="checkbox" class="mr-2"> Extra Cheese (+₹20)</label><label class="flex items-center"><input type="checkbox" class="mr-2"> Olives (+₹15)</label></div><button class="w-full mt-6 bg-yellow-400 text-gray-900 font-bold py-3 rounded-lg ripple" onclick="closeModal('customization-modal')">Done</button></div>
+        </div>
+        <div id="feedback-modal" class="modal-container">
+            <div class="modal-content text-center"><i class="fas fa-check-circle text-5xl text-green-500 mb-3"></i><h3 class="font-bold text-xl mb-2">Order Delivered!</h3><p class="text-gray-500 mb-4">How was your experience?</p><div class="flex justify-center space-x-2 text-3xl text-gray-300 mb-4"><i class="fas fa-star cursor-pointer hover:text-yellow-400"></i><i class="fas fa-star cursor-pointer hover:text-yellow-400"></i><i class="fas fa-star cursor-pointer hover:text-yellow-400"></i><i class="fas fa-star cursor-pointer hover:text-yellow-400"></i><i class="fas fa-star cursor-pointer hover:text-yellow-400"></i></div><textarea placeholder="Share your feedback..." class="w-full border rounded-lg p-2 h-20 text-sm"></textarea><button class="w-full mt-4 bg-yellow-400 text-gray-900 font-bold py-3 rounded-lg ripple" onclick="submitFeedback()">Submit</button></div>
+        </div>
+        <div id="rewards-earned-modal" class="modal-container">
+             <div class="modal-content text-center bg-gray-800 text-white"><p class="text-lg">You've earned</p><div class="flex justify-center items-center my-4"><p class="text-6xl font-bold coin-animation">50</p><i class="fas fa-coins text-5xl text-yellow-300 ml-3 coin-animation" style="animation-delay: 0.1s;"></i></div><p class="text-2xl font-bold">NightCoins!</p><p class="mt-4 text-sm">Your new balance is 150 NightCoins.</p><button class="w-full mt-6 bg-yellow-400 text-gray-900 font-bold py-3 rounded-lg ripple" onclick="closeModal('rewards-earned-modal'); navigateTo('home-screen')">Awesome!</button></div>
+        </div>
+        <div id="custom-alert" class="custom-alert"></div>
+
+    </div>
+
+    <script>
+        // --- State Management ---
+        const navigationStack = [];
+        let currentOnboardingSlide = 0;
+
+        // --- DOM Elements ---
+        const screens = document.querySelectorAll('.screen');
+        const mainAppContainer = document.getElementById('main-app');
+        const deliveryToggle = document.getElementById('delivery-toggle');
+        const pickupOptions = document.getElementById('pickup-options');
+        const ownerTabs = document.querySelectorAll('#owner-dashboard-screen .tab-button');
+        const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+        const cartPreview = document.getElementById('cart-preview');
+        const cartInfo = document.getElementById('cart-info');
+        const progressBar = document.getElementById('progress-bar');
+        const riderIcon = document.getElementById('rider-icon');
+        const onboardingSlides = document.getElementById('onboarding-slides');
+        const progressDots = document.getElementById('progress-dots');
+        const onboardingNextBtn = document.getElementById('onboarding-next');
+
+        // --- Initial Setup ---
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.display = 'none';
+                showScreen('onboarding-screen');
+            }, 3000);
+
+            document.querySelectorAll('.ripple').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    const rect = this.getBoundingClientRect();
+                    const ripple = document.createElement('span');
+                    const diameter = Math.max(this.clientWidth, this.clientHeight);
+                    const radius = diameter / 2;
+                    ripple.style.width = ripple.style.height = `${diameter}px`;
+                    ripple.style.left = `${e.clientX - rect.left - radius}px`;
+                    ripple.style.top = `${e.clientY - rect.top - radius}px`;
+                    ripple.classList.add('ripple-effect');
+                    this.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+        });
+
+        // --- Navigation ---
+        function showScreen(screenId) {
+            screens.forEach(s => s.classList.add('hidden'));
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) {
+                targetScreen.classList.remove('hidden');
+                targetScreen.style.transform = 'translateX(0)';
+            }
+        }
+
+        function navigateTo(screenId) {
+            const currentScreen = Array.from(screens).find(s => !s.classList.contains('hidden'));
+            const targetScreen = document.getElementById(screenId);
+
+            if (currentScreen && targetScreen && currentScreen.id !== screenId) {
+                if(screenId === 'home-screen' || screenId === 'owner-dashboard-screen' || screenId === 'agent-dashboard-screen' || screenId === 'agent-kyc-screen') {
+                    navigationStack.length = 0; // Clear stack for main views
+                }
+                navigationStack.push(currentScreen.id);
+                
+                if (screenId.includes('dashboard') || screenId.includes('kyc')) {
+                     mainAppContainer.classList.add('hidden');
+                }
+                if (screenId === 'home-screen') {
+                    mainAppContainer.classList.remove('hidden');
+                }
+
+                currentScreen.classList.add('slide-out');
+                targetScreen.classList.remove('hidden');
+                targetScreen.style.transform = 'translateX(100%)';
+                
+                setTimeout(() => {
+                    targetScreen.style.transform = 'translateX(0)';
+                    currentScreen.classList.add('hidden');
+                    currentScreen.classList.remove('slide-out');
+                }, 10);
+
+                if (screenId === 'payment-screen') {
+                    setTimeout(() => {
+                        navigateTo('tracking-screen');
+                        startOrderTracking();
+                    }, 3000);
+                }
+            }
+        }
+
+        function navigateBack() {
+            const targetScreenId = navigationStack.pop();
+            if (targetScreenId) {
+                const currentScreen = Array.from(screens).find(s => !s.classList.contains('hidden'));
+                const targetScreen = document.getElementById(targetScreenId);
+                if (currentScreen && targetScreen) {
+                    currentScreen.style.transform = 'translateX(100%)';
+                    targetScreen.classList.remove('hidden', 'slide-out');
+                    targetScreen.style.transform = 'translateX(-100%)';
+                    setTimeout(() => {
+                        targetScreen.style.transform = 'translateX(0)';
+                        currentScreen.classList.add('hidden');
+                    }, 10);
+                }
+            }
+        }
+        
+        // --- Onboarding Logic ---
+        onboardingNextBtn.addEventListener('click', () => {
+            currentOnboardingSlide++;
+            if (currentOnboardingSlide < 3) {
+                onboardingSlides.style.transform = `translateX(-${currentOnboardingSlide * 100}%)`;
+                updateProgressDots();
+                if (currentOnboardingSlide === 2) {
+                    onboardingNextBtn.textContent = 'Finish';
+                }
+            } else {
+                navigateTo('login-screen');
+            }
+        });
+
+        function updateProgressDots() {
+            progressDots.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const dot = document.createElement('div');
+                dot.className = `w-2 h-2 rounded-full ${i === currentOnboardingSlide ? 'bg-yellow-400' : 'bg-gray-300'}`;
+                progressDots.appendChild(dot);
+            }
+        }
+        
+        // --- Cart Logic ---
+        deliveryToggle.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                deliveryToggle.querySelectorAll('button').forEach(btn => {
+                    btn.classList.remove('bg-white', 'shadow', 'text-gray-800');
+                    btn.classList.add('text-gray-500');
+                });
+                e.target.classList.add('bg-white', 'shadow', 'text-gray-800');
+                e.target.classList.remove('text-gray-500');
+
+                if (e.target.dataset.type === 'pickup') {
+                    pickupOptions.classList.remove('hidden');
+                } else {
+                    pickupOptions.classList.add('hidden');
+                }
+            }
+        });
+
+        function addToCart(event) {
+            event.stopPropagation();
+            cartPreview.classList.remove('hidden');
+            const currentItems = parseInt((cartInfo.textContent.split(' ')[0] || "0"), 10);
+            const newItems = currentItems + 1;
+            const newTotal = newItems * 90; // Mock price
+            cartInfo.textContent = `${newItems} item${newItems > 1 ? 's' : ''} • ₹${newTotal}`;
+            showCustomAlert('Item added to cart!');
+        }
+
+        // --- Order Tracking ---
+        function startOrderTracking() {
+            if(!progressBar || !riderIcon) return;
+            let progress = 25;
+            progressBar.style.width = `${progress}%`;
+            riderIcon.style.left = '20%';
+            const statuses = ['Confirmed', 'Preparing', 'Ready', 'Delivered'];
+            const statusElements = statuses.map(s => document.getElementById(`status-${s.toLowerCase()}`));
+            
+            const stages = [
+                { progress: 50, riderPos: '45%', text: 'Your order is being prepared.', status: 1 },
+                { progress: 75, riderPos: '70%', text: 'Your order is ready for pickup!', status: 2 },
+                { progress: 100, riderPos: '90%', text: 'Your order has been delivered!', status: 3 }
+            ];
+
+            let currentStage = 0;
+            const interval = setInterval(() => {
+                if (currentStage < stages.length) {
+                    const stage = stages[currentStage];
+                    progressBar.style.width = `${stage.progress}%`;
+                    riderIcon.style.left = stage.riderPos;
+                    showCustomAlert(stage.text);
+                    statusElements.forEach((el, index) => {
+                        el.classList.toggle('font-bold', index <= stage.status);
+                        el.classList.toggle('text-yellow-600', index <= stage.status);
+                    });
+                    
+                    if (stage.progress === 100) {
+                        clearInterval(interval);
+                        setTimeout(() => openModal('feedback-modal'), 1500);
+                    }
+                    currentStage++;
+                } else {
+                     clearInterval(interval);
+                }
+            }, 4000);
+        }
+
+        // --- Restaurant Owner Dashboard ---
+        ownerTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                ownerTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                document.querySelectorAll('#owner-dashboard-screen > div:not(:first-child):not(:nth-child(2))').forEach(content => {
+                    if(content.id) content.classList.add('hidden');
+                });
+                document.getElementById(tab.dataset.tab).classList.remove('hidden');
+            });
+        });
+
+        function updateOrderStatus(button, newStatus) {
+            const card = button.closest('.order-card');
+            card.style.transition = 'opacity 0.5s';
+            card.style.opacity = '0';
+            setTimeout(() => {
+                card.remove();
+                showCustomAlert(`Order moved to '${newStatus}'`);
+            }, 500);
+        }
+        
+        // --- Bottom Nav ---
+        bottomNavItems.forEach(item => {
+            item.addEventListener('click', () => {
+                bottomNavItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                const targetId = item.dataset.target;
+                mainAppContainer.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+                document.getElementById(targetId).classList.remove('hidden');
+            });
+        });
+
+        // --- Logout ---
+        function logout() {
+            navigationStack.length = 0;
+            screens.forEach(s => s.classList.add('hidden'));
+            showScreen('login-screen');
+        }
+        
+        // --- Modal & Alert ---
+        function openModal(modalId) { document.getElementById(modalId).classList.add('show'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('show'); }
+        function showCustomAlert(message) {
+            const alertBox = document.getElementById('custom-alert');
+            if(alertBox) {
+                alertBox.textContent = message;
+                alertBox.classList.add('show');
+                setTimeout(() => {
+                    alertBox.classList.remove('show');
+                }, 3000);
+            }
+        }
+        function submitFeedback() {
+            closeModal('feedback-modal');
+            setTimeout(() => openModal('rewards-earned-modal'), 500);
+        }
+    </script>
+</body>
+</html>
