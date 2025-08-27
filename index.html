@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -123,6 +124,14 @@
             border-bottom-color: #facc15;
             color: #1a202c;
         }
+        /* Toggle Switch CSS */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #48bb78;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #48bb78;
+        }
     </style>
 </head>
 <body class="bg-gray-800 flex justify-center items-center h-screen">
@@ -196,6 +205,10 @@
             <!-- Home Screen -->
             <div id="home-screen" class="screen !relative !transform-none pb-20">
                 <div class="p-4">
+                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-3 rounded-md mb-4" role="alert">
+                      <p class="font-bold">Special Offer!</p>
+                      <p class="text-sm">Get 20% off on all orders from Sharma's Canteen tonight!</p>
+                    </div>
                     <h1 class="text-2xl font-bold text-gray-800">Hi, Raghav Gupta!</h1>
                     <p class="text-gray-500">What are you craving tonight?</p>
                     <div class="mt-4 relative">
@@ -225,9 +238,12 @@
             </div>
             
             <div id="menu-screen" class="screen hidden pb-20">
-                <div class="p-4 flex items-center border-b">
-                    <button class="text-gray-700 mr-4" onclick="navigateBack()"><i class="fas fa-arrow-left text-xl"></i></button>
-                    <h2 class="text-xl font-bold text-gray-800">Sharma's Canteen</h2>
+                <div class="p-4 flex items-center justify-between border-b">
+                    <div class="flex items-center">
+                        <button class="text-gray-700 mr-4" onclick="navigateBack()"><i class="fas fa-arrow-left text-xl"></i></button>
+                        <h2 class="text-xl font-bold text-gray-800">Sharma's Canteen</h2>
+                    </div>
+                    <span class="text-sm font-semibold text-green-600 flex items-center"><i class="fas fa-circle text-xs mr-1 animate-pulse"></i>Live Menu</span>
                 </div>
                 <div class="p-4 space-y-4">
                     <div class="flex items-center">
@@ -255,42 +271,45 @@
                 </div>
             </div>
 
-            <div id="cart-screen" class="screen hidden bg-gray-50">
+            <div id="cart-screen" class="screen hidden bg-gray-50 flex flex-col">
                 <div class="p-4 flex items-center border-b">
                     <button class="text-gray-700 mr-4" onclick="navigateBack()"><i class="fas fa-arrow-left text-xl"></i></button>
                     <h2 class="text-xl font-bold text-gray-800">Your Cart</h2>
                 </div>
-                <div class="p-4 space-y-3">
-                    <div class="flex items-center bg-white p-3 rounded-lg"><div class="flex-grow"><h4 class="font-semibold">Aloo Paratha</h4><p class="font-bold text-gray-800">₹80</p></div><div class="flex items-center space-x-3 bg-gray-100 rounded-lg px-2 py-1"><button class="font-bold text-lg">-</button><span>1</span><button class="font-bold text-lg">+</button></div></div>
-                    <div class="flex items-center bg-white p-3 rounded-lg"><div class="flex-grow"><h4 class="font-semibold">Cold Coffee</h4><p class="font-bold text-gray-800">₹100</p></div><div class="flex items-center space-x-3 bg-gray-100 rounded-lg px-2 py-1"><button class="font-bold text-lg">-</button><span>1</span><button class="font-bold text-lg">+</button></div></div>
-                </div>
-                <div class="p-4">
-                    <div class="flex justify-center bg-gray-200 p-1 rounded-full" id="delivery-toggle">
-                        <button class="w-1/2 bg-white text-gray-800 py-2 rounded-full shadow font-semibold" data-type="delivery">Delivery</button>
-                        <button class="w-1/2 text-gray-500 py-2 rounded-full font-semibold" data-type="pickup">Pickup</button>
+                <div class="flex-grow pb-20">
+                    <div class="p-4 space-y-3">
+                        <div class="flex items-center bg-white p-3 rounded-lg"><div class="flex-grow"><h4 class="font-semibold">Aloo Paratha</h4><p class="font-bold text-gray-800">₹80</p></div><div class="flex items-center space-x-3 bg-gray-100 rounded-lg px-2 py-1"><button class="font-bold text-lg">-</button><span>1</span><button class="font-bold text-lg">+</button></div></div>
+                        <div class="flex items-center bg-white p-3 rounded-lg"><div class="flex-grow"><h4 class="font-semibold">Cold Coffee</h4><p class="font-bold text-gray-800">₹100</p></div><div class="flex items-center space-x-3 bg-gray-100 rounded-lg px-2 py-1"><button class="font-bold text-lg">-</button><span>1</span><button class="font-bold text-lg">+</button></div></div>
                     </div>
-                </div>
-                <div id="pickup-options" class="hidden p-4 space-y-3">
-                    <div>
-                        <label class="font-bold text-sm">Pickup Time</label>
-                        <input type="time" value="23:30" class="w-full mt-1 p-2 border rounded-lg">
-                    </div>
-                    <div>
-                        <label class="font-bold text-sm">Broadcast On</label>
-                        <div class="flex space-x-4 text-3xl mt-2">
-                            <i class="fab fa-whatsapp-square text-green-500 cursor-pointer"></i>
-                            <i class="fab fa-instagram-square text-pink-500 cursor-pointer"></i>
-                            <i class="fab fa-facebook-square text-blue-600 cursor-pointer"></i>
+                    <div class="p-4">
+                        <div class="flex justify-center bg-gray-200 p-1 rounded-full" id="delivery-toggle">
+                            <button class="w-1/2 bg-white text-gray-800 py-2 rounded-full shadow font-semibold" data-type="delivery">Delivery</button>
+                            <button class="w-1/2 text-gray-500 py-2 rounded-full font-semibold" data-type="pickup">Pickup</button>
                         </div>
                     </div>
-                </div>
-                <div class="p-4 border-t border-b bg-white">
-                    <div class="flex justify-between items-center"><p class="text-gray-500">Subtotal</p><p class="font-semibold">₹180</p></div>
-                    <div class="flex justify-between items-center mt-1"><p class="text-gray-500">Taxes & Charges</p><p class="font-semibold">₹32</p></div>
-                    <div class="flex justify-between items-center mt-3 pt-3 border-t font-bold text-lg"><p>To Pay</p><p>₹212</p></div>
-                </div>
-                <div class="p-4 mt-auto">
-                     <button class="w-full bg-yellow-400 text-gray-900 font-bold py-3 px-4 rounded-lg shadow-md ripple" onclick="navigateTo('payment-screen')">Proceed to Payment</button>
+                    <div id="pickup-options" class="hidden p-4 space-y-3">
+                        <div>
+                            <label class="font-bold text-sm">Pickup Time</label>
+                            <input type="time" value="23:30" class="w-full mt-1 p-2 border rounded-lg">
+                        </div>
+                        <div>
+                            <label class="font-bold text-sm">Broadcast On</label>
+                            <div class="flex space-x-4 text-3xl mt-2">
+                                <i class="fab fa-whatsapp-square text-green-500 cursor-pointer"></i>
+                                <i class="fab fa-instagram-square text-pink-500 cursor-pointer"></i>
+                                <i class="fab fa-facebook-square text-blue-600 cursor-pointer"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 border-t border-b bg-white">
+                        <div class="flex justify-between items-center"><p class="text-gray-500">Subtotal</p><p class="font-semibold">₹180</p></div>
+                        <div class="flex justify-between items-center mt-1"><p class="text-gray-500">Taxes & Charges</p><p class="font-semibold">₹32</p></div>
+                        <div class="flex justify-between items-center mt-3 pt-3 border-t font-bold text-lg"><p>To Pay</p><p>₹212</p></div>
+                    </div>
+                     <div class="p-4 flex items-center space-x-2">
+                         <button class="w-16 h-12 flex-shrink-0 border border-gray-300 text-gray-800 font-bold rounded-lg shadow-sm ripple" onclick="openModal('schedule-modal')"><i class="fas fa-clock text-xl"></i></button>
+                         <button class="w-full bg-yellow-400 text-gray-900 font-bold py-3 px-4 rounded-lg shadow-md ripple" onclick="navigateTo('payment-screen')">Proceed to Payment</button>
+                    </div>
                 </div>
             </div>
             
@@ -317,7 +336,7 @@
                     <i id="rider-icon" class="fas fa-motorcycle text-4xl text-gray-900 bg-white p-2 rounded-full shadow-lg absolute transition-all duration-1000" style="left: 20%; bottom: 40%;"></i>
                 </div>
                  <div class="p-4 text-center">
-                    <button class="bg-red-100 text-red-600 px-6 py-2 rounded-lg font-semibold">Cancel Order</button>
+                    <button class="bg-red-100 text-red-600 px-6 py-2 rounded-lg font-semibold ripple" onclick="cancelOrder()">Cancel Order</button>
                 </div>
             </div>
 
@@ -329,7 +348,7 @@
                             <div><h4 class="font-bold">Sharma's Canteen</h4><p class="text-sm text-gray-500">Aloo Paratha, Cold Coffee • Aug 27, 2025</p></div>
                             <span class="text-sm font-semibold bg-green-100 text-green-700 px-2 py-1 rounded-full">Delivered</span>
                         </div>
-                        <div class="flex justify-between items-center mt-3"><p class="font-bold">₹212</p><button class="bg-yellow-100 text-yellow-600 font-bold px-4 py-1 rounded-lg text-sm ripple">Reorder</button></div>
+                        <div class="flex justify-between items-center mt-3"><p class="font-bold">₹212</p><button class="bg-yellow-100 text-yellow-600 font-bold px-4 py-1 rounded-lg text-sm ripple" onclick="showCustomAlert('Items from your past order have been added to the cart!')">Reorder</button></div>
                     </div>
                 </div>
             </div>
@@ -414,7 +433,41 @@
                         <span class="font-bold text-lg">₹50</span>
                     </div>
                     <p class="text-xs text-gray-500 mt-1"><span class="font-semibold">To:</span> Student Dorm Block-A</p>
-                    <button class="w-full mt-3 bg-green-500 text-white font-bold py-2 rounded-lg ripple" onclick="showCustomAlert('Order Accepted! Please proceed to pickup.')">Accept Job</button>
+                    <button class="w-full mt-3 bg-green-500 text-white font-bold py-2 rounded-lg ripple" onclick="navigateTo('agent-job-details-screen')">Accept Job</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Agent Job Details Screen -->
+        <div id="agent-job-details-screen" class="screen hidden">
+            <div class="p-4 flex items-center border-b">
+                 <button class="text-gray-700 mr-4" onclick="navigateBack()"><i class="fas fa-arrow-left text-xl"></i></button>
+                <h2 class="text-xl font-bold text-gray-800">Job #NM54321</h2>
+            </div>
+            <div class="p-4 space-y-4">
+                <div id="agent-stage-pickup" class="bg-white p-4 rounded-lg shadow">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold"><i class="fas fa-store mr-2 text-gray-400"></i>Pickup</h3>
+                        <i id="pickup-check" class="fas fa-circle-notch text-gray-400"></i>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">Pick up order from Sharma's Canteen.</p>
+                    <button id="pickup-btn" class="w-full mt-3 bg-blue-500 text-white font-bold py-2 rounded-lg ripple" onclick="markStageDone('pickup')">Mark as Picked Up</button>
+                </div>
+                <div id="agent-stage-delivered" class="bg-white p-4 rounded-lg shadow opacity-50">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold"><i class="fas fa-map-marker-alt mr-2 text-gray-400"></i>Deliver</h3>
+                        <i id="delivered-check" class="fas fa-circle-notch text-gray-400"></i>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">Deliver order to Raghav G. at Dorm Block-A.</p>
+                    <button id="delivered-btn" class="w-full mt-3 bg-blue-500 text-white font-bold py-2 rounded-lg ripple" onclick="markStageDone('delivered')" disabled>Mark as Delivered</button>
+                </div>
+                <div id="agent-stage-coins" class="bg-white p-4 rounded-lg shadow opacity-50">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold"><i class="fas fa-coins mr-2 text-gray-400"></i>Complete</h3>
+                        <i id="coins-check" class="fas fa-circle-notch text-gray-400"></i>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">You will receive 50 NightCoins for this delivery.</p>
+                    <button id="coins-btn" class="w-full mt-3 bg-green-500 text-white font-bold py-2 rounded-lg ripple" onclick="markStageDone('coins')" disabled>Finish Job</button>
                 </div>
             </div>
         </div>
@@ -425,34 +478,78 @@
                 <div><h2 class="text-xl font-bold text-gray-800">Welcome, Sharma!</h2><p class="text-sm text-gray-500">Sharma's Canteen Dashboard</p></div>
                 <button class="text-gray-700" onclick="logout()"><i class="fas fa-sign-out-alt text-xl"></i></button>
             </div>
-            <div class="flex border-b">
-                <button class="tab-button flex-1 text-center py-3 font-semibold border-b-2 border-transparent text-gray-500 active" data-tab="new-orders">New (2)</button>
-                <button class="tab-button flex-1 text-center py-3 font-semibold border-b-2 border-transparent text-gray-500" data-tab="preparing-orders">Preparing (1)</button>
-                <button class="tab-button flex-1 text-center py-3 font-semibold border-b-2 border-transparent text-gray-500" data-tab="ready-orders">Ready (0)</button>
+            <div class="flex border-b overflow-x-auto">
+                <button class="tab-button flex-shrink-0 px-4 py-3 font-semibold border-b-2 border-transparent text-gray-500 active" data-tab="new-orders">New (<span id="new-count">1</span>)</button>
+                <button class="tab-button flex-shrink-0 px-4 py-3 font-semibold border-b-2 border-transparent text-gray-500" data-tab="preparing-orders">Preparing (<span id="preparing-count">1</span>)</button>
+                <button class="tab-button flex-shrink-0 px-4 py-3 font-semibold border-b-2 border-transparent text-gray-500" data-tab="ready-orders">Ready (<span id="ready-count">0</span>)</button>
+                <button class="tab-button flex-shrink-0 px-4 py-3 font-semibold border-b-2 border-transparent text-gray-500" data-tab="menu-management">Menu</button>
+                <button class="tab-button flex-shrink-0 px-4 py-3 font-semibold border-b-2 border-transparent text-gray-500" data-tab="analytics-view">Analytics</button>
             </div>
             <div id="new-orders" class="p-4 space-y-3">
-                <div class="bg-white p-3 rounded-lg shadow order-card">
-                    <div class="flex justify-between"><h4 class="font-bold">Order #NM12345</h4><span class="text-sm text-gray-500">2 mins ago</span></div>
-                    <p class="font-semibold my-1">1x Aloo Paratha, 1x Cold Coffee</p>
-                    <div class="flex space-x-2 mt-2">
+                <div class="bg-white p-3 rounded-lg shadow order-card" data-order-id="NM12345">
+                    <div class="order-details">
+                        <div class="flex justify-between"><h4 class="font-bold">Order #NM12345</h4><span class="text-sm text-gray-500">2 mins ago</span></div>
+                        <p class="font-semibold my-1">1x Aloo Paratha, 1x Cold Coffee</p>
+                    </div>
+                    <div class="order-actions flex space-x-2 mt-2">
                         <button class="flex-1 bg-red-500 text-white font-bold py-2 rounded-lg ripple">Reject</button>
                         <button class="flex-1 bg-green-500 text-white font-bold py-2 rounded-lg ripple" onclick="updateOrderStatus(this, 'preparing')">Accept & Prepare</button>
                     </div>
                 </div>
             </div>
             <div id="preparing-orders" class="p-4 space-y-3 hidden">
-                 <div class="bg-white p-3 rounded-lg shadow order-card">
-                    <div class="flex justify-between"><h4 class="font-bold">Order #NM12344</h4><span class="text-sm text-gray-500">5 mins ago</span></div>
-                    <p class="font-semibold my-1">2x Samosa</p>
-                    <button class="w-full mt-2 bg-yellow-500 text-white font-bold py-2 rounded-lg ripple" onclick="updateOrderStatus(this, 'ready')">Mark as Ready for Pickup</button>
+                 <div class="bg-white p-3 rounded-lg shadow order-card" data-order-id="NM12344">
+                    <div class="order-details">
+                        <div class="flex justify-between"><h4 class="font-bold">Order #NM12344</h4><span class="text-sm text-gray-500">5 mins ago</span></div>
+                        <p class="font-semibold my-1">2x Samosa</p>
+                    </div>
+                    <div class="order-actions mt-2">
+                        <button class="w-full bg-yellow-500 text-white font-bold py-2 rounded-lg ripple" onclick="updateOrderStatus(this, 'ready')">Mark as Ready</button>
+                    </div>
                 </div>
             </div>
             <div id="ready-orders" class="p-4 space-y-3 hidden">
                 <p class="text-center text-gray-500 mt-8">No orders are ready for pickup.</p>
             </div>
+            <div id="menu-management" class="p-4 space-y-3 hidden">
+                <div class="flex justify-between items-center bg-white p-3 rounded-lg shadow">
+                    <div><h4 class="font-semibold">Aloo Paratha</h4><p class="text-sm text-gray-500">₹80</p></div>
+                    <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" name="toggle" id="toggle1" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" checked/>
+                        <label for="toggle1" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                    </div>
+                </div>
+                 <div class="flex justify-between items-center bg-white p-3 rounded-lg shadow">
+                    <div><h4 class="font-semibold">Cold Coffee</h4><p class="text-sm text-gray-500">₹100</p></div>
+                    <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" name="toggle" id="toggle2" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" checked/>
+                        <label for="toggle2" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                    </div>
+                </div>
+            </div>
+            <div id="analytics-view" class="p-4 space-y-4 hidden">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white p-3 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Today's Sales</p><p class="text-2xl font-bold">₹8,450</p></div>
+                    <div class="bg-white p-3 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Busiest Hour</p><p class="text-2xl font-bold">11 PM</p></div>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-2">Peak Hour Sales</h4>
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <canvas id="peakHoursChart"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Modals and Alerts -->
+        <div id="schedule-modal" class="modal-container">
+            <div class="modal-content">
+                <h3 class="font-bold text-lg mb-4">Schedule Your Order</h3>
+                <div><label class="font-semibold text-sm">Select Date</label><input type="date" value="2025-08-28" class="w-full p-2 border rounded-lg mt-1"></div>
+                <div class="mt-4"><label class="font-semibold text-sm">Select Time</label><input type="time" value="22:00" class="w-full p-2 border rounded-lg mt-1"></div>
+                <button class="w-full mt-6 bg-yellow-400 text-gray-900 font-bold py-3 rounded-lg ripple" onclick="closeModal('schedule-modal'); showCustomAlert('Your order has been scheduled!')">Confirm Schedule</button>
+            </div>
+        </div>
         <div id="customization-modal" class="modal-container">
             <div class="modal-content"><h3 class="font-bold text-lg mb-4">Customize Item</h3><p class="font-semibold">Spice Level</p><div class="flex space-x-2 mt-1 mb-4"><button class="flex-1 border py-2 rounded-lg">Mild</button><button class="flex-1 border border-yellow-400 bg-yellow-100 py-2 rounded-lg">Medium</button><button class="flex-1 border py-2 rounded-lg">Spicy</button></div><p class="font-semibold">Add-ons</p><div class="space-y-2 mt-1"><label class="flex items-center"><input type="checkbox" class="mr-2"> Extra Cheese (+₹20)</label><label class="flex items-center"><input type="checkbox" class="mr-2"> Olives (+₹15)</label></div><button class="w-full mt-6 bg-yellow-400 text-gray-900 font-bold py-3 rounded-lg ripple" onclick="closeModal('customization-modal')">Done</button></div>
         </div>
@@ -460,7 +557,7 @@
             <div class="modal-content text-center"><i class="fas fa-check-circle text-5xl text-green-500 mb-3"></i><h3 class="font-bold text-xl mb-2">Order Delivered!</h3><p class="text-gray-500 mb-4">How was your experience?</p><div class="flex justify-center space-x-2 text-3xl text-gray-300 mb-4"><i class="fas fa-star cursor-pointer hover:text-yellow-400"></i><i class="fas fa-star cursor-pointer hover:text-yellow-400"></i><i class="fas fa-star cursor-pointer hover:text-yellow-400"></i><i class="fas fa-star cursor-pointer hover:text-yellow-400"></i><i class="fas fa-star cursor-pointer hover:text-yellow-400"></i></div><textarea placeholder="Share your feedback..." class="w-full border rounded-lg p-2 h-20 text-sm"></textarea><button class="w-full mt-4 bg-yellow-400 text-gray-900 font-bold py-3 rounded-lg ripple" onclick="submitFeedback()">Submit</button></div>
         </div>
         <div id="rewards-earned-modal" class="modal-container">
-             <div class="modal-content text-center bg-gray-800 text-white"><p class="text-lg">You've earned</p><div class="flex justify-center items-center my-4"><p class="text-6xl font-bold coin-animation">50</p><i class="fas fa-coins text-5xl text-yellow-300 ml-3 coin-animation" style="animation-delay: 0.1s;"></i></div><p class="text-2xl font-bold">NightCoins!</p><p class="mt-4 text-sm">Your new balance is 150 NightCoins.</p><button class="w-full mt-6 bg-yellow-400 text-gray-900 font-bold py-3 rounded-lg ripple" onclick="closeModal('rewards-earned-modal'); navigateTo('home-screen')">Awesome!</button></div>
+             <div class="modal-content text-center bg-gray-800 text-white"><p class="text-lg">You've earned</p><div class="flex justify-center items-center my-4"><p class="text-6xl font-bold coin-animation">50</p><i class="fas fa-coins text-5xl text-yellow-300 ml-3 coin-animation" style="animation-delay: 0.1s;"></i></div><p class="text-2xl font-bold">NightCoins!</p><p class="mt-4 text-sm">Your new balance is 200 NightCoins.</p><button class="w-full mt-6 bg-yellow-400 text-gray-900 font-bold py-3 rounded-lg ripple" onclick="closeModal('rewards-earned-modal'); navigateTo('home-screen')">Awesome!</button></div>
         </div>
         <div id="custom-alert" class="custom-alert"></div>
 
@@ -470,6 +567,7 @@
         // --- State Management ---
         const navigationStack = [];
         let currentOnboardingSlide = 0;
+        let peakHoursChartInstance = null;
 
         // --- DOM Elements ---
         const screens = document.querySelectorAll('.screen');
@@ -529,7 +627,7 @@
                 }
                 navigationStack.push(currentScreen.id);
                 
-                if (screenId.includes('dashboard') || screenId.includes('kyc')) {
+                if (screenId.includes('dashboard') || screenId.includes('kyc') || screenId.includes('job-details')) {
                      mainAppContainer.classList.add('hidden');
                 }
                 if (screenId === 'home-screen') {
@@ -622,6 +720,21 @@
             cartInfo.textContent = `${newItems} item${newItems > 1 ? 's' : ''} • ₹${newTotal}`;
             showCustomAlert('Item added to cart!');
         }
+        
+        function cancelOrder() {
+            showCustomAlert('Order #NM12345 has been cancelled.');
+            setTimeout(() => {
+                // Resetting the main app view to home screen
+                mainAppContainer.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+                document.getElementById('home-screen').classList.remove('hidden');
+                
+                // Resetting the bottom nav to home
+                bottomNavItems.forEach(i => i.classList.remove('active'));
+                document.querySelector('.bottom-nav-item[data-target="home-screen"]').classList.add('active');
+
+                navigateTo('home-screen');
+            }, 1000);
+        }
 
         // --- Order Tracking ---
         function startOrderTracking() {
@@ -646,8 +759,10 @@
                     riderIcon.style.left = stage.riderPos;
                     showCustomAlert(stage.text);
                     statusElements.forEach((el, index) => {
-                        el.classList.toggle('font-bold', index <= stage.status);
-                        el.classList.toggle('text-yellow-600', index <= stage.status);
+                        if(el) {
+                            el.classList.toggle('font-bold', index <= stage.status);
+                            el.classList.toggle('text-yellow-600', index <= stage.status);
+                        }
                     });
                     
                     if (stage.progress === 100) {
@@ -670,18 +785,114 @@
                 document.querySelectorAll('#owner-dashboard-screen > div:not(:first-child):not(:nth-child(2))').forEach(content => {
                     if(content.id) content.classList.add('hidden');
                 });
-                document.getElementById(tab.dataset.tab).classList.remove('hidden');
+                const targetTab = document.getElementById(tab.dataset.tab);
+                if(targetTab) targetTab.classList.remove('hidden');
+                
+                if(tab.dataset.tab === 'analytics-view') {
+                    renderPeakHoursChart();
+                }
             });
         });
 
         function updateOrderStatus(button, newStatus) {
             const card = button.closest('.order-card');
-            card.style.transition = 'opacity 0.5s';
+            
+            card.style.transition = 'opacity 0.3s ease-out';
             card.style.opacity = '0';
+
             setTimeout(() => {
-                card.remove();
+                let targetContainer;
+                let newButtonHtml = '';
+
+                if (newStatus === 'preparing') {
+                    targetContainer = document.getElementById('preparing-orders');
+                    newButtonHtml = `<button class="w-full mt-2 bg-yellow-500 text-white font-bold py-2 rounded-lg ripple" onclick="updateOrderStatus(this, 'ready')">Mark as Ready</button>`;
+                } else if (newStatus === 'ready') {
+                    targetContainer = document.getElementById('ready-orders');
+                    newButtonHtml = `<p class="text-center text-green-600 font-semibold mt-2"><i class="fas fa-check-circle mr-2"></i>Ready for pickup</p>`;
+                }
+                
+                // Update the card's action button area
+                const actionArea = card.querySelector('.order-actions');
+                if(actionArea) {
+                    actionArea.innerHTML = newButtonHtml;
+                }
+
+                // Move the card to the new container
+                if (targetContainer) {
+                    targetContainer.prepend(card); // Prepend to show at the top
+                }
+
+                // Update counts and show alert
+                updateOrderCounts();
                 showCustomAlert(`Order moved to '${newStatus}'`);
-            }, 500);
+                
+                // Fade the card back in
+                card.style.opacity = '1';
+
+            }, 300); // Wait for fade-out to complete
+        }
+        
+        function updateOrderCounts() {
+            document.getElementById('new-count').textContent = document.querySelectorAll('#new-orders .order-card').length;
+            document.getElementById('preparing-count').textContent = document.querySelectorAll('#preparing-orders .order-card').length;
+            document.getElementById('ready-count').textContent = document.querySelectorAll('#ready-orders .order-card').length;
+        }
+
+        function renderPeakHoursChart() {
+            const ctx = document.getElementById('peakHoursChart').getContext('2d');
+            if(peakHoursChartInstance) {
+                peakHoursChartInstance.destroy();
+            }
+            peakHoursChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['9pm', '10pm', '11pm', '12am', '1am'],
+                    datasets: [{
+                        label: 'Orders',
+                        data: [12, 25, 30, 22, 15],
+                        backgroundColor: 'rgba(250, 204, 21, 0.2)',
+                        borderColor: 'rgba(217, 119, 6, 1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+        
+        // --- Agent Job Details ---
+        function markStageDone(stage) {
+            const checkIcon = document.getElementById(`${stage}-check`);
+            const button = document.getElementById(`${stage}-btn`);
+            const stageContainer = document.getElementById(`agent-stage-${stage}`);
+
+            if (checkIcon) {
+                checkIcon.classList.remove('fa-circle-notch');
+                checkIcon.classList.add('fa-check-circle', 'text-green-500');
+            }
+            if (button) {
+                button.disabled = true;
+                button.textContent = stage.charAt(0).toUpperCase() + stage.slice(1) + ' Complete';
+                button.classList.remove('bg-blue-500');
+                button.classList.add('bg-gray-400');
+            }
+
+            if (stage === 'pickup') {
+                document.getElementById('agent-stage-delivered').classList.remove('opacity-50');
+                document.getElementById('delivered-btn').disabled = false;
+            } else if (stage === 'delivered') {
+                document.getElementById('agent-stage-coins').classList.remove('opacity-50');
+                document.getElementById('coins-btn').disabled = false;
+            } else if (stage === 'coins') {
+                showCustomAlert('Job Finished! 50 NightCoins earned.');
+                setTimeout(() => navigateTo('agent-dashboard-screen'), 2000);
+            }
         }
         
         // --- Bottom Nav ---
